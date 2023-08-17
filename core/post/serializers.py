@@ -39,4 +39,4 @@ class PostSerializer(AbstractSerializer):
         return request.user.has_liked(instance)
     
     def get_likes_count(self, instance):
-        return instance.liked_by_count()
+        return instance.liked_by.count()

@@ -6,6 +6,10 @@ from core.post.models import Post
 from core.abstract.models import AbstractManager, AbstractModel
 # Create your models here.
 
+def user_directory_path(instance, filename):
+     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return "user_{0}/{1}".format(instance.public_id, filename)
+
 class UserManager(BaseUserManager, AbstractManager):
     def get_object_by_public_id(self, public_id):
         try:
@@ -13,7 +17,7 @@ class UserManager(BaseUserManager, AbstractManager):
         except (ObjectDoesNotExist, ValueError, TypeError):
             return None
     
-    def creat_user(self, username, email, password=None, **kwargs):
+    def create_user(self, username, email, password=None, **kwargs):
         if  username is None:
             raise TypeError("Users must have a username")
         if email is None:
@@ -32,7 +36,7 @@ class UserManager(BaseUserManager, AbstractManager):
             raise TypeError("Superuser must have a username")
         if email is None:
             raise TypeError("Superuser must have a email")
-        user = self.creat_user(username, email, password, **kwargs)
+        user = self.create_user(username, email, password, **kwargs)
         user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
@@ -45,13 +49,15 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(db_index=True, unique=True)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
+    bio = models.TextField(null=True)
+    avatar = models.ImageField(null=True, blank=True, upload_to=user_directory_path)
     posts_liked = models.ManyToManyField(
         "core_post.Post",
         related_name="liked_by"
     )
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = "username"
+    EMAIL_FIELD = "email"
     objects = UserManager()
 
     def __str__(self):

@@ -8,7 +8,7 @@ class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         refresh = self.get_token(self.user)
-        data['user'] = UserSerializer(self.user).data
+        data['user'] = UserSerializer(self.user, context=self.context).data
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)
 
